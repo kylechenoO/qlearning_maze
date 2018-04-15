@@ -42,10 +42,11 @@ class Robot(object):
         """
         if self.testing:
             # TODO 1. No random choice when testing
-            pass
+            self.epsilon = 0
+
         else:
             # TODO 2. Update parameters when learning
-            pass
+            self.epsilon += 0.1
 
         return self.epsilon
 
@@ -55,7 +56,7 @@ class Robot(object):
         """
 
         # TODO 3. Return robot's current state
-        return None
+        return(self.maze.sense_robot())
 
     def create_Qtable_line(self, state):
         """
@@ -66,7 +67,22 @@ class Robot(object):
         # Qtable[state] ={'u':xx, 'd':xx, ...}
         # If Qtable[state] already exits, then do
         # not change it.
-        pass
+        if state in self.Qtable:
+            return(self.Qtable[state])
+
+        from copy import deepcopy
+        rewards = {}
+        for direct in self.valid_actions:
+            qrb = deepcopy(self)
+            reward = qrb.maze.move_robot(direct)
+            rewards[direct] = reward
+        
+        self.Qtable[state] = rewards
+        rewards = self.Qtable[state]
+        direction = self.get_highest(state)
+        max_drt_reward = rewards[direction]
+        self.Qtable[state] = { key: (1 - self.alpha) * reward + self.alpha * (rewards[key] + self.gamma * max_drt_reward) for key in rewards }
+        return(self.Qtable[state])
 
     def choose_action(self):
         """
@@ -77,28 +93,54 @@ class Robot(object):
             # TODO 5. Return whether do random choice
             # hint: generate a random number, and compare
             # it with epsilon
-            pass
+            rnd = random.randrange(0, 100, 1)
+            if rnd < (self.epsilon * 100):
+                return(True)
+
+            else:
+                return(False)
+
 
         if self.learning:
             if is_random_exploration():
                 # TODO 6. Return random choose aciton
-                return None
+                return(self.valid_actions[random.randrange(-1, 3, 1)])
             else:
                 # TODO 7. Return action with highest q value
-                return None
+                return(self.get_highest(self.state))
+
         elif self.testing:
             # TODO 7. choose action with highest q value
+            return(self.get_highest(self.state))
+
         else:
             # TODO 6. Return random choose aciton
+            return(self.valid_actions[random.randrange(-1, 3, 1)])
 
-    def update_Qtable(self, r, action, next_state):
+    # get highest direction
+    def get_highest(self, state):
+        max_val = 0
+        qstate = self.Qtable[state]
+        max_val = -10000
+        drt = ''
+        for direct in self.valid_actions:
+            if max_val < qstate[direct]:
+                max_val = qstate[direct]
+                drt = direct
+
+        return(drt)
+
+    def update_Qtable(self, reward, action, next_state):
         """
         Update the qtable according to the given rule.
         """
         if self.learning:
-            pass
             # TODO 8. When learning, update the q table accriding
             # to the given rules
+            rewards = self.Qtable[next_state]
+            direction = self.get_highest(next_state)
+            max_drt_reward = rewards[direction]
+            self.Qtable[next_state] = { key: (1 - self.alpha) * reward + self.alpha * (rewards[key] + self.gamma * max_drt_reward) for key in rewards }
 
     def update(self):
         """
