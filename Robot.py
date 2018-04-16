@@ -46,7 +46,7 @@ class Robot(object):
 
         else:
             # TODO 2. Update parameters when learning
-            self.epsilon += 0.1
+            self.epsilon -= 0.05
 
         return self.epsilon
 
@@ -70,18 +70,7 @@ class Robot(object):
         if state in self.Qtable:
             return(self.Qtable[state])
 
-        from copy import deepcopy
-        rewards = {}
-        for direct in self.valid_actions:
-            qrb = deepcopy(self)
-            reward = qrb.maze.move_robot(direct)
-            rewards[direct] = reward
-        
-        self.Qtable[state] = rewards
-        rewards = self.Qtable[state]
-        direction = self.get_highest(state)
-        max_drt_reward = rewards[direction]
-        self.Qtable[state] = { key: (1 - self.alpha) * reward + self.alpha * (rewards[key] + self.gamma * max_drt_reward) for key in rewards }
+        self.Qtable[state] = { key: 0 for key in self.valid_actions }
         return(self.Qtable[state])
 
     def choose_action(self):
@@ -93,8 +82,8 @@ class Robot(object):
             # TODO 5. Return whether do random choice
             # hint: generate a random number, and compare
             # it with epsilon
-            rnd = random.randrange(0, 100, 1)
-            if rnd < (self.epsilon * 100):
+            rnd = random.random()
+            if rnd < self.epsilon:
                 return(True)
 
             else:
@@ -104,7 +93,7 @@ class Robot(object):
         if self.learning:
             if is_random_exploration():
                 # TODO 6. Return random choose aciton
-                return(self.valid_actions[random.randrange(-1, 3, 1)])
+                return(random.choice(self.valid_actions))
             else:
                 # TODO 7. Return action with highest q value
                 return(self.get_highest(self.state))
@@ -115,20 +104,11 @@ class Robot(object):
 
         else:
             # TODO 6. Return random choose aciton
-            return(self.valid_actions[random.randrange(-1, 3, 1)])
+            return(random.choice(self.valid_actions))
 
     # get highest direction
     def get_highest(self, state):
-        max_val = 0
-        qstate = self.Qtable[state]
-        max_val = -10000
-        drt = ''
-        for direct in self.valid_actions:
-            if max_val < qstate[direct]:
-                max_val = qstate[direct]
-                drt = direct
-
-        return(drt)
+        return(max(self.Qtable[self.state], key=self.Qtable[self.state].get))
 
     def update_Qtable(self, reward, action, next_state):
         """
@@ -140,7 +120,7 @@ class Robot(object):
             rewards = self.Qtable[next_state]
             direction = self.get_highest(next_state)
             max_drt_reward = rewards[direction]
-            self.Qtable[next_state] = { key: (1 - self.alpha) * reward + self.alpha * (rewards[key] + self.gamma * max_drt_reward) for key in rewards }
+            self.Qtable[self.state][action] = (1 - self.alpha) * self.Qtable[self.state][action] + self.alpha * (reward + self.gamma * max_drt_reward)
 
     def update(self):
         """
