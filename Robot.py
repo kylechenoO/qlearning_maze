@@ -1,4 +1,5 @@
 import random
+import math
 
 class Robot(object):
 
@@ -46,7 +47,7 @@ class Robot(object):
 
         else:
             # TODO 2. Update parameters when learning
-            self.epsilon -= 0.05
+            self.epsilon -= 0.005
 
         return self.epsilon
 
@@ -67,11 +68,7 @@ class Robot(object):
         # Qtable[state] ={'u':xx, 'd':xx, ...}
         # If Qtable[state] already exits, then do
         # not change it.
-        if state in self.Qtable:
-            return(self.Qtable[state])
-
-        self.Qtable[state] = { key: 0 for key in self.valid_actions }
-        return(self.Qtable[state])
+        self.Qtable.setdefault(state, {a: 0.0 for a in self.valid_actions})
 
     def choose_action(self):
         """
@@ -117,9 +114,7 @@ class Robot(object):
         if self.learning:
             # TODO 8. When learning, update the q table accriding
             # to the given rules
-            rewards = self.Qtable[next_state]
-            direction = self.get_highest(next_state)
-            max_drt_reward = rewards[direction]
+            max_drt_reward = max(self.Qtable[next_state].values())
             self.Qtable[self.state][action] = (1 - self.alpha) * self.Qtable[self.state][action] + self.alpha * (reward + self.gamma * max_drt_reward)
 
     def update(self):
