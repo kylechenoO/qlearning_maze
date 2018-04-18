@@ -1,5 +1,5 @@
 import random
-import math
+from math import exp
 
 class Robot(object):
 
@@ -47,7 +47,8 @@ class Robot(object):
 
         else:
             # TODO 2. Update parameters when learning
-            self.epsilon -= 0.005
+            # self.epsilon -= 0.005
+            self.epsilon = exp(self.epsilon * self.t)
 
         return self.epsilon
 
@@ -85,7 +86,6 @@ class Robot(object):
 
             else:
                 return(False)
-
 
         if self.learning:
             if is_random_exploration():
