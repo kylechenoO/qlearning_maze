@@ -20,6 +20,7 @@ class Robot(object):
 
         self.Qtable = {}
         self.reset()
+        self.a = 0
 
     def reset(self):
         """
@@ -48,7 +49,8 @@ class Robot(object):
         else:
             # TODO 2. Update parameters when learning
             # self.epsilon -= 0.005
-            self.epsilon = exp(self.epsilon * self.t)
+            self.epsilon = exp(self.a * self.t)
+            self.a -= 0.01
 
         return self.epsilon
 
