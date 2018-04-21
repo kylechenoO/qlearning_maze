@@ -17,10 +17,10 @@ class Robot(object):
         self.epsilon0 = epsilon0
         self.epsilon = epsilon0
         self.t = 0
+        self.a = -0.5
 
         self.Qtable = {}
         self.reset()
-        self.a = 0
 
     def reset(self):
         """
@@ -48,9 +48,8 @@ class Robot(object):
 
         else:
             # TODO 2. Update parameters when learning
-            # self.epsilon -= 0.005
-            self.epsilon = exp(self.a * self.t)
-            self.a -= 0.01
+            self.epsilon = self.epsilon0 * exp(self.a * self.t)
+            self.t += 1
 
         return self.epsilon
 
